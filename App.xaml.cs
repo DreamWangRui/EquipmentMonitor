@@ -1,6 +1,8 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Serilog;
 using System;
+using System.IO;
 using System.Windows;
 using EquipmentMonitor.Services;
 using EquipmentMonitor.ViewModels;
@@ -18,7 +20,19 @@ namespace EquipmentMonitor
         {
             base.OnStartup(e);
 
+            // prepare log path in LocalAppData
+            var logDir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "EquipmentMonitor", "Logs");
+            Directory.CreateDirectory(logDir);
+            var logPath = Path.Combine(logDir, "log-.txt"); // rolling by date using Serilog file sink
+
+            Log.Logger = new LoggerConfiguration()
+                .MinimumLevel.Debug()
+                .WriteTo.Console()
+                .WriteTo.File(logPath, rollingInterval: RollingInterval.Day)
+                .CreateLogger();
+
             _host = Host.CreateDefaultBuilder()
+                .UseSerilog()
                 .ConfigureServices((context, services) =>
                 {
                     // register services
@@ -28,7 +42,7 @@ namespace EquipmentMonitor
                     // register viewmodels
                     services.AddSingleton<MainViewModel>();
 
-                    // register MainWindow and let DI inject DataContext if needed
+                    // register MainWindow and let DI inject DataContext
                     services.AddSingleton<MainWindow>(sp =>
                     {
                         var window = new MainWindow();
@@ -44,15 +58,20 @@ namespace EquipmentMonitor
             // Show MainWindow
             var mainWindow = _host.Services.GetRequiredService<MainWindow>();
             mainWindow.Show();
+
+            Log.Information("Application started");
         }
 
         protected override async void OnExit(ExitEventArgs e)
         {
+            Log.Information("Application stopping");
             if (_host != null)
             {
                 await _host.StopAsync();
                 _host.Dispose();
             }
+
+            Log.CloseAndFlush();
             base.OnExit(e);
         }
     }

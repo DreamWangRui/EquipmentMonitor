@@ -2,6 +2,7 @@
 using CommunityToolkit.Mvvm.Input;
 using EquipmentMonitor.Models;
 using EquipmentMonitor.Services;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.ObjectModel;
 using System.Threading.Tasks;
@@ -19,6 +20,7 @@ namespace EquipmentMonitor.ViewModels
 
         private readonly ISensorService _sensorService;
         private readonly IStorageService _storageService;
+        private readonly ILogger<MainViewModel> _logger;
         private DispatcherTimer? timer;
 
         public ObservableCollection<SensorData> DataList
@@ -57,12 +59,13 @@ namespace EquipmentMonitor.ViewModels
         public IRelayCommand StartStopCommand { get; }
 
         // Provide a public parameterless constructor for XAML usage that creates default services
-        public MainViewModel() : this(new ModbusSensorService(), new SqliteStorageService()) { }
+        public MainViewModel() : this(new ModbusSensorService(), new SqliteStorageService(), Microsoft.Extensions.Logging.Abstractions.NullLogger<MainViewModel>.Instance) { }
 
-        public MainViewModel(ISensorService sensorService, IStorageService storageService)
+        public MainViewModel(ISensorService sensorService, IStorageService storageService, ILogger<MainViewModel> logger)
         {
             _sensorService = sensorService ?? throw new ArgumentNullException(nameof(sensorService));
             _storageService = storageService ?? throw new ArgumentNullException(nameof(storageService));
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
 
             ConnectCommand = new RelayCommand(async () => await ConnectAsync());
             StartStopCommand = new RelayCommand(ToggleStartStop);
@@ -74,6 +77,7 @@ namespace EquipmentMonitor.ViewModels
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex, "Database initialization failed");
                 MessageBox.Show($"数据库初始化失败: {ex.Message}");
             }
 
@@ -88,10 +92,12 @@ namespace EquipmentMonitor.ViewModels
             {
                 await _sensorService.ConnectAsync("127.0.0.1", 502);
                 IsConnected = _sensorService.IsConnected;
+                _logger.LogInformation("Connected to sensor");
                 MessageBox.Show("连接成功！", "提示", MessageBoxButton.OK, MessageBoxImage.Information);
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex, "Connect failed");
                 MessageBox.Show($"连接失败: {ex.Message}", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
                 IsConnected = false;
             }
@@ -109,11 +115,13 @@ namespace EquipmentMonitor.ViewModels
 
                 timer?.Start();
                 IsCollecting = true;
+                _logger.LogInformation("Started collecting data");
             }
             else
             {
                 timer?.Stop();
                 IsCollecting = false;
+                _logger.LogInformation("Stopped collecting data");
             }
         }
 
@@ -142,7 +150,7 @@ namespace EquipmentMonitor.ViewModels
                 }
                 catch (Exception ex)
                 {
-                    // log or notify
+                    _logger.LogWarning(ex, "Save to DB failed");
                     Console.WriteLine($"保存到数据库失败: {ex.Message}");
                 }
 
@@ -151,6 +159,7 @@ namespace EquipmentMonitor.ViewModels
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex, "Read failed");
                 MessageBox.Show($"读取数据失败: {ex.Message}", "错误", MessageBoxButton.OK, MessageBoxImage.Warning);
                 timer?.Stop();
                 IsCollecting = false;
@@ -161,6 +170,7 @@ namespace EquipmentMonitor.ViewModels
         {
             timer?.Stop();
             try { _sensorService.Disconnect(); } catch { }
+            _logger.LogInformation("MainViewModel disposed");
         }
     }
 }
