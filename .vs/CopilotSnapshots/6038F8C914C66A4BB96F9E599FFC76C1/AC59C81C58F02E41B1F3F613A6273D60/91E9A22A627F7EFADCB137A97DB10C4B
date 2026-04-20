@@ -1,0 +1,11 @@
+﻿using System;
+
+namespace EquipmentMonitor.Services
+{
+    public interface ISensorService : IDisposable
+    {
+        bool IsConnected { get; }
+        void Connect(string ip, int port);
+        double ReadValue();
+    }
+}

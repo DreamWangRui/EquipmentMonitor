@@ -1,0 +1,117 @@
+{
+  "Version": 1,
+  "WorkspaceRootPath": "F:\\Projects\\EquipmentMonitor\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{BCD43299-19AB-4994-A004-895FABF40606}|EquipmentMonitor\\EquipmentMonitor.csproj|f:\\projects\\equipmentmonitor\\equipmentmonitor\\app.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{BCD43299-19AB-4994-A004-895FABF40606}|EquipmentMonitor\\EquipmentMonitor.csproj|solutionrelative:equipmentmonitor\\app.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{BCD43299-19AB-4994-A004-895FABF40606}|EquipmentMonitor\\EquipmentMonitor.csproj|f:\\projects\\equipmentmonitor\\equipmentmonitor\\services\\modbussensorservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{BCD43299-19AB-4994-A004-895FABF40606}|EquipmentMonitor\\EquipmentMonitor.csproj|solutionrelative:equipmentmonitor\\services\\modbussensorservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{BCD43299-19AB-4994-A004-895FABF40606}|EquipmentMonitor\\EquipmentMonitor.csproj|f:\\projects\\equipmentmonitor\\equipmentmonitor\\services\\ipollingservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{BCD43299-19AB-4994-A004-895FABF40606}|EquipmentMonitor\\EquipmentMonitor.csproj|solutionrelative:equipmentmonitor\\services\\ipollingservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{BCD43299-19AB-4994-A004-895FABF40606}|EquipmentMonitor\\EquipmentMonitor.csproj|f:\\projects\\equipmentmonitor\\equipmentmonitor\\services\\pollinghostedservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{BCD43299-19AB-4994-A004-895FABF40606}|EquipmentMonitor\\EquipmentMonitor.csproj|solutionrelative:equipmentmonitor\\services\\pollinghostedservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{BCD43299-19AB-4994-A004-895FABF40606}|EquipmentMonitor\\EquipmentMonitor.csproj|f:\\projects\\equipmentmonitor\\equipmentmonitor\\viewmodels\\mainviewmodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{BCD43299-19AB-4994-A004-895FABF40606}|EquipmentMonitor\\EquipmentMonitor.csproj|solutionrelative:equipmentmonitor\\viewmodels\\mainviewmodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    }
+  ],
+  "DocumentGroupContainers": [
+    {
+      "Orientation": 0,
+      "VerticalTabListWidth": 256,
+      "DocumentGroups": [
+        {
+          "DockedWidth": 200,
+          "SelectedChildIndex": 6,
+          "Children": [
+            {
+              "$type": "Bookmark",
+              "Name": "ST:128:0:{75188d03-9892-4ae2-abf1-207126247ce5}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:129:0:{75188d03-9892-4ae2-abf1-207126247ce5}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:130:0:{116d2292-e37d-41cd-a077-ebacac4c8cc4}"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "MainViewModel.cs",
+              "DocumentMoniker": "F:\\Projects\\EquipmentMonitor\\EquipmentMonitor\\ViewModels\\MainViewModel.cs",
+              "RelativeDocumentMoniker": "EquipmentMonitor\\ViewModels\\MainViewModel.cs",
+              "ToolTip": "F:\\Projects\\EquipmentMonitor\\EquipmentMonitor\\ViewModels\\MainViewModel.cs",
+              "RelativeToolTip": "EquipmentMonitor\\ViewModels\\MainViewModel.cs",
+              "ViewState": "AgIAAJIAAAAAAAAAAABcwAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-04-20T10:29:30.308Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "PollingHostedService.cs",
+              "DocumentMoniker": "F:\\Projects\\EquipmentMonitor\\EquipmentMonitor\\Services\\PollingHostedService.cs",
+              "RelativeDocumentMoniker": "EquipmentMonitor\\Services\\PollingHostedService.cs",
+              "ToolTip": "F:\\Projects\\EquipmentMonitor\\EquipmentMonitor\\Services\\PollingHostedService.cs",
+              "RelativeToolTip": "EquipmentMonitor\\Services\\PollingHostedService.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAADwv2wAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-04-20T10:28:56.903Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "IPollingService.cs",
+              "DocumentMoniker": "F:\\Projects\\EquipmentMonitor\\EquipmentMonitor\\Services\\IPollingService.cs",
+              "RelativeDocumentMoniker": "EquipmentMonitor\\Services\\IPollingService.cs",
+              "ToolTip": "F:\\Projects\\EquipmentMonitor\\EquipmentMonitor\\Services\\IPollingService.cs",
+              "RelativeToolTip": "EquipmentMonitor\\Services\\IPollingService.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAADwvw4AAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-04-20T10:28:39.73Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "App.xaml.cs",
+              "DocumentMoniker": "F:\\Projects\\EquipmentMonitor\\EquipmentMonitor\\App.xaml.cs",
+              "RelativeDocumentMoniker": "EquipmentMonitor\\App.xaml.cs",
+              "ToolTip": "F:\\Projects\\EquipmentMonitor\\EquipmentMonitor\\App.xaml.cs",
+              "RelativeToolTip": "EquipmentMonitor\\App.xaml.cs",
+              "ViewState": "AgIAADQAAAAAAAAAAAAgwAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-04-19T01:17:55.556Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "ModbusSensorService.cs",
+              "DocumentMoniker": "F:\\Projects\\EquipmentMonitor\\EquipmentMonitor\\Services\\ModbusSensorService.cs",
+              "RelativeDocumentMoniker": "EquipmentMonitor\\Services\\ModbusSensorService.cs",
+              "ToolTip": "F:\\Projects\\EquipmentMonitor\\EquipmentMonitor\\Services\\ModbusSensorService.cs",
+              "RelativeToolTip": "EquipmentMonitor\\Services\\ModbusSensorService.cs",
+              "ViewState": "AgIAAC8AAAAAAAAAAAAnwAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-04-10T02:59:06.387Z"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{40ea2e6b-2121-4bb8-a43e-c83c04b51041}"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

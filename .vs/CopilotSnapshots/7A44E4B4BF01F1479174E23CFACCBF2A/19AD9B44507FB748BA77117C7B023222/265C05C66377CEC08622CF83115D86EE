@@ -1,0 +1,152 @@
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
+using EquipmentMonitor.Models;
+using EquipmentMonitor.Services;
+using Microsoft.Extensions.Logging;
+using System;
+using System.Collections.ObjectModel;
+using System.Threading.Tasks;
+using System.Windows;
+using System.Windows.Threading;
+
+namespace EquipmentMonitor.ViewModels
+{
+    public class MainViewModel : ObservableObject, IDisposable
+    {
+        private ObservableCollection<SensorData> _dataList = new ObservableCollection<SensorData>();
+        private string _currentValue = "0";
+        private bool _isConnected;
+        private bool _isCollecting;
+
+        private readonly ISensorService _sensorService;
+        private readonly IStorageService _storageService;
+        private readonly IPollingService _pollingService;
+        private readonly ILogger<MainViewModel> _logger;
+        private Dispatcher? _uiDispatcher;
+
+        public ObservableCollection<SensorData> DataList
+        {
+            get => _dataList;
+            set => SetProperty(ref _dataList, value);
+        }
+
+        public string CurrentValue
+        {
+            get => _currentValue;
+            set => SetProperty(ref _currentValue, value);
+        }
+
+        public bool IsConnected
+        {
+            get => _isConnected;
+            set => SetProperty(ref _isConnected, value);
+        }
+
+        public bool IsCollecting
+        {
+            get => _isCollecting;
+            set
+            {
+                if (SetProperty(ref _isCollecting, value))
+                {
+                    OnPropertyChanged(nameof(StartButtonText));
+                }
+            }
+        }
+
+        public string StartButtonText => IsCollecting ? "停止采集" : "开始采集";
+
+        public IRelayCommand ConnectCommand { get; }
+        public IRelayCommand StartStopCommand { get; }
+
+        // Provide a public parameterless constructor for XAML usage that creates default services
+        public MainViewModel() : this(new ModbusSensorService(), new SqliteStorageService(), new PollingHostedService(new ModbusSensorService(), new SqliteStorageService(), Microsoft.Extensions.Logging.Abstractions.NullLogger<PollingHostedService>.Instance), Microsoft.Extensions.Logging.Abstractions.NullLogger<MainViewModel>.Instance) { }
+
+        public MainViewModel(ISensorService sensorService, IStorageService storageService, IPollingService pollingService, ILogger<MainViewModel> logger)
+        {
+            _sensorService = sensorService ?? throw new ArgumentNullException(nameof(sensorService));
+            _storageService = storageService ?? throw new ArgumentNullException(nameof(storageService));
+            _pollingService = pollingService ?? throw new ArgumentNullException(nameof(pollingService));
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+
+            ConnectCommand = new RelayCommand(async () => await ConnectAsync());
+            StartStopCommand = new RelayCommand(ToggleStartStop);
+
+            // Initialize storage (create DB/table)
+            try
+            {
+                _storageService.Initialize();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Database initialization failed");
+                MessageBox.Show($"数据库初始化失败: {ex.Message}");
+            }
+
+            // capture UI dispatcher for thread-safe updates
+            _uiDispatcher = Dispatcher.CurrentDispatcher;
+
+            // subscribe to polling data
+            _pollingService.DataReceived += PollingService_DataReceived;
+        }
+
+        private void PollingService_DataReceived(object? sender, SensorData e)
+        {
+            // ensure UI thread
+            _uiDispatcher?.Invoke(() =>
+            {
+                CurrentValue = e.Value.ToString("F2");
+                DataList.Insert(0, e);
+                if (DataList.Count > 50)
+                    DataList.RemoveAt(DataList.Count - 1);
+            });
+        }
+
+        private async Task ConnectAsync()
+        {
+            try
+            {
+                await _sensorService.ConnectAsync("127.0.0.1", 502);
+                IsConnected = _sensorService.IsConnected;
+                _logger.LogInformation("Connected to sensor");
+                MessageBox.Show("连接成功！", "提示", MessageBoxButton.OK, MessageBoxImage.Information);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Connect failed");
+                MessageBox.Show($"连接失败: {ex.Message}", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
+                IsConnected = false;
+            }
+        }
+
+        private void ToggleStartStop()
+        {
+            if (!IsCollecting)
+            {
+                if (!IsConnected)
+                {
+                    MessageBox.Show("请先连接设备！", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
+                    return;
+                }
+
+                _pollingService.Start();
+                IsCollecting = true;
+                _logger.LogInformation("Started collecting data");
+            }
+            else
+            {
+                _pollingService.Stop();
+                IsCollecting = false;
+                _logger.LogInformation("Stopped collecting data");
+            }
+        }
+
+        public void Dispose()
+        {
+            try { _pollingService.DataReceived -= PollingService_DataReceived; } catch { }
+            try { _pollingService.Stop(); } catch { }
+            try { _sensorService.Disconnect(); } catch { }
+            _logger.LogInformation("MainViewModel disposed");
+        }
+    }
+}

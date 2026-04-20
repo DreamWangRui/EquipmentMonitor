@@ -1,0 +1,195 @@
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
+using EquipmentMonitor.Models;
+using NModbus;
+using System;
+using System.Collections.ObjectModel;
+using System.Data.SQLite;
+using System.Net.Sockets;
+using System.Windows;
+using System.Windows.Threading;
+
+namespace EquipmentMonitor.ViewModels
+{
+    public class MainViewModel : ObservableObject, IDisposable
+    {
+        private ObservableCollection<SensorData> _dataList = new ObservableCollection<SensorData>();
+        private string _currentValue = "0";
+        private bool _isConnected;
+        private bool _isCollecting;
+
+        private TcpClient? client;
+        private IModbusMaster? master;
+        private DispatcherTimer? timer;
+
+        public ObservableCollection<SensorData> DataList
+        {
+            get => _dataList;
+            set => SetProperty(ref _dataList, value);
+        }
+
+        public string CurrentValue
+        {
+            get => _currentValue;
+            set => SetProperty(ref _currentValue, value);
+        }
+
+        public bool IsConnected
+        {
+            get => _isConnected;
+            set => SetProperty(ref _isConnected, value);
+        }
+
+        public bool IsCollecting
+        {
+            get => _isCollecting;
+            set
+            {
+                if (SetProperty(ref _isCollecting, value))
+                {
+                    OnPropertyChanged(nameof(StartButtonText));
+                }
+            }
+        }
+
+        public string StartButtonText => IsCollecting ? "停止采集" : "开始采集";
+
+        public IRelayCommand ConnectCommand { get; }
+        public IRelayCommand StartStopCommand { get; }
+
+        public MainViewModel()
+        {
+            ConnectCommand = new RelayCommand(Connect);
+            StartStopCommand = new RelayCommand(ToggleStartStop);
+
+            InitializeDatabase();
+
+            timer = new DispatcherTimer();
+            timer.Interval = TimeSpan.FromSeconds(1);
+            timer.Tick += Timer_Tick;
+        }
+
+        private void Connect()
+        {
+            try
+            {
+                client = new TcpClient("127.0.0.1", 502);
+                var factory = new ModbusFactory();
+                master = factory.CreateMaster(client);
+                IsConnected = true;
+                MessageBox.Show("连接成功！", "提示", MessageBoxButton.OK, MessageBoxImage.Information);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"连接失败: {ex.Message}", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
+                IsConnected = false;
+            }
+        }
+
+        private void ToggleStartStop()
+        {
+            if (!IsCollecting)
+            {
+                if (!IsConnected)
+                {
+                    MessageBox.Show("请先连接设备！", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
+                    return;
+                }
+
+                timer?.Start();
+                IsCollecting = true;
+            }
+            else
+            {
+                timer?.Stop();
+                IsCollecting = false;
+            }
+        }
+
+        private void Timer_Tick(object? sender, EventArgs e)
+        {
+            try
+            {
+                if (master == null)
+                {
+                    MessageBox.Show("请先连接设备！", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
+                    timer?.Stop();
+                    IsCollecting = false;
+                    return;
+                }
+
+                ushort[] registers = master.ReadHoldingRegisters(1, 0, 1);
+                double value = registers[0];
+
+                CurrentValue = value.ToString("F2");
+
+                var sensorData = new SensorData(value);
+                DataList.Insert(0, sensorData);
+
+                SaveToDatabase(sensorData);
+
+                if (DataList.Count > 50)
+                    DataList.RemoveAt(DataList.Count - 1);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"读取数据失败: {ex.Message}", "错误", MessageBoxButton.OK, MessageBoxImage.Warning);
+                timer?.Stop();
+                IsCollecting = false;
+            }
+        }
+
+        private void InitializeDatabase()
+        {
+            try
+            {
+                using (var connection = new SQLiteConnection("Data Source=sensor.db"))
+                {
+                    connection.Open();
+                    string createTable = @"
+                        CREATE TABLE IF NOT EXISTS SensorData (
+                            Id INTEGER PRIMARY KEY AUTOINCREMENT,
+                            Value REAL NOT NULL,
+                            Time DATETIME NOT NULL
+                        )";
+                    new SQLiteCommand(createTable, connection).ExecuteNonQuery();
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"数据库初始化失败: {ex.Message}");
+            }
+        }
+
+        private void SaveToDatabase(SensorData data)
+        {
+            try
+            {
+                using (var connection = new SQLiteConnection("Data Source=sensor.db"))
+                {
+                    connection.Open();
+                    string insert = "INSERT INTO SensorData (Value, Time) VALUES (@value, @time)";
+                    var command = new SQLiteCommand(insert, connection);
+                    command.Parameters.AddWithValue("@value", data.Value);
+                    command.Parameters.AddWithValue("@time", data.Timestamp);
+                    command.ExecuteNonQuery();
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"保存到数据库失败: {ex.Message}");
+            }
+        }
+
+        public void Dispose()
+        {
+            timer?.Stop();
+            master = null;
+            try
+            {
+                client?.Close();
+            }
+            catch { }
+        }
+    }
+}
